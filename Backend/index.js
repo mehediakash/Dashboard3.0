@@ -1,11 +1,13 @@
+require("dotenv").config();
 const express = require("express");
-const app = express();
+const routs = require("./Router");
 const dbconfig = require("./Config/dbconfig.js");
+
+const app = express();
+app.use(express.json());
 dbconfig();
-app.get("/", function (req, res) {
-  console.log("hello world");
-  res.send("Hello World");
-});
+
+app.use(routs);
 
 app.listen(8000, () => {
   console.log("server is running 8000");
