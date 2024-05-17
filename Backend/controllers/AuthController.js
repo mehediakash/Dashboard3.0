@@ -44,8 +44,27 @@ async function singup(req, res) {
   console.log("Singup");
 }
 
-function login(req, res) {
-  console.log("Login");
+async function login(req, res) {
+  const { email, password } = req.body;
+  console.log(email, password);
+  if (!EmailValidation(email)) {
+    return res.status(404).json({ error: "Authication fail" });
+  }
+  let userData = await UserModels.findOne({ email: email });
+  if (!userData && userData?.email != email) {
+    return res.status(404).json({ error: "Authication fail" });
+  }
+  bcrypt.compare(password, userData.password, function (err, result) {
+    if (result) {
+      return res.status(200).json({
+        Name: userData.firstName,
+        email: userData.email,
+        PhoneNumber: userData.phoneNumber,
+      });
+    } else {
+      res.status(404).json({ error: "Authication fail" });
+    }
+  });
 }
 
 async function EmailVerify(req, res) {
