@@ -9,23 +9,43 @@ const transporter = nodemailer.createTransport({
     pass: "fbkkrpstkntqshqh",
   },
 });
-async function EmailSend(email, verifyLink) {
-  const templatePath = path.join(
-    __dirname,
-    "../EmailTemplete/SingupVerify",
-    "index.html"
-  );
-  console.log(templatePath);
+async function EmailSend(email, templateType, dynamicData) {
+  let templatePath;
+
+  switch (templateType) {
+    case "verify":
+      templatePath = path.join(
+        __dirname,
+        "../EmailTemplete/SingupVerify",
+        "index.html"
+      );
+      break;
+    case "forgotPassword":
+      templatePath = path.join(
+        __dirname,
+        "../EmailTemplete/ForgotPassword",
+        "index.html"
+      );
+      break;
+    default:
+      throw new Error("Invalid template type");
+  }
+
   let htmlTemplate = fs.readFileSync(templatePath, "utf-8");
 
   // Replace placeholders with actual values
-  htmlTemplate = htmlTemplate.replace("{{VERIFY_LINK}}", verifyLink);
+  for (const [key, value] of Object.entries(dynamicData)) {
+    const placeholder = `{{${key}}}`;
+    htmlTemplate = htmlTemplate.replace(new RegExp(placeholder, "g"), value);
+  }
 
   const info = await transporter.sendMail({
-    from: '"Maddison Foo Koch 👻" <maddison53@ethereal.email>', // sender address
+    from: "LogicGrid Soft by Ecommerce <LogicGrid Soft@gmail.com>", // sender address
     to: email, // list of receivers
-    subject: "Hello ✔", // Subject line
-    text: "Hello world?", // plain text body
+    subject:
+      templateType === "verify"
+        ? "Verify Your Email Address"
+        : "Reset Your Password", // Subject line
     html: htmlTemplate, // html body
   });
 }
